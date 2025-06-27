@@ -16,7 +16,7 @@ export const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200">
+    <div className="w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700">
       <div className="p-6">
         <div className="flex items-center space-x-2">
           <Brain className="h-8 w-8 text-purple-600" />
@@ -37,8 +37,8 @@ export const Sidebar = () => {
                   className={cn(
                     'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
-                      ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 border-r-2 border-purple-600'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/50 dark:to-blue-900/50 text-purple-700 dark:text-purple-300 border-r-2 border-purple-600'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   )}
                 >
                   <item.icon className="h-5 w-5 mr-3" />
