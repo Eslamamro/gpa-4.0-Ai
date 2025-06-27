@@ -1,73 +1,95 @@
-# Welcome to your Lovable project
+# StudyMate AI Toolkit
 
-## Project info
+An AI-powered study companion that helps students transform their notes into summaries, flashcards, and interactive quizzes. Built with React, TypeScript, and modern web technologies.
 
-**URL**: https://lovable.dev/projects/5e66b7b9-2be2-4e3e-97d1-986d7ed8157d
+## Features
 
-## How can I edit this code?
+- **AI-Powered Summaries**: Transform lengthy notes into concise, digestible summaries
+- **Interactive Flashcards**: Automatically generate flashcards from your study materials  
+- **Smart Quizzes**: Create personalized quizzes to test your knowledge
+- **File Upload**: Support for various file formats (PDF, text files, etc.)
+- **Modern UI**: Beautiful, responsive interface built with shadcn/ui components
+- **Dark Mode**: Toggle between light and dark themes
+- **Mobile Responsive**: Works seamlessly on all devices
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **shadcn/ui** components with Radix UI primitives
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **React Hook Form** with Zod validation
+- **Lucide React** icons
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5e66b7b9-2be2-4e3e-97d1-986d7ed8157d) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v16 or higher)
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+```bash
+git clone https://github.com/Rushdy00/gpa-4.0-Ai.git
+cd gpa-4.0-Ai
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Available Scripts
 
-**Use GitHub Codespaces**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   └── Sidebar.tsx     # Navigation sidebar
+├── contexts/           # React contexts
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+├── pages/              # Page components
+│   ├── Dashboard.tsx   # Main dashboard
+│   ├── Home.tsx        # Landing page
+│   ├── Login.tsx       # Login page
+│   ├── Register.tsx    # Registration page
+│   ├── Flashcards.tsx  # Flashcards page
+│   ├── Quiz.tsx        # Quiz page
+│   └── Settings.tsx    # Settings page
+└── main.tsx           # App entry point
+```
 
-This project is built with:
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/5e66b7b9-2be2-4e3e-97d1-986d7ed8157d) and click on Share -> Publish.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Can I connect a custom domain to my Lovable project?
+## Support
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+If you have any questions or need help, please open an issue on GitHub.
