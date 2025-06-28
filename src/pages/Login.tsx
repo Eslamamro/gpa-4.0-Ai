@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,13 +12,28 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement actual login logic with Supabase
-    console.log('Login attempt:', { email, password });
-    setTimeout(() => setIsLoading(false), 1000);
+    setError('');
+    
+    // Demo credentials for bypassing login
+    const demoEmail = 'student@studymate.ai';
+    const demoPassword = 'demo123';
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      if (email === demoEmail && password === demoPassword) {
+        console.log('Login successful!');
+        navigate('/dashboard');
+      } else {
+        setError('Invalid credentials. Use: student@studymate.ai / demo123');
+      }
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleGoogleLogin = () => {
@@ -27,7 +42,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:bg-[#000000] dark:from-[#000000] dark:via-[#000000] dark:to-[#000000] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -40,15 +55,27 @@ const Login = () => {
           <p className="text-gray-600 dark:text-gray-400">Welcome back to your study companion</p>
         </div>
 
-        <Card className="border-0 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+        <Card className="border-0 shadow-2xl bg-white/80 dark:bg-[#1F1F1F]/95 backdrop-blur-md dark:border-[#1A1A1A]">
           <CardHeader>
             <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">Sign In</CardTitle>
-            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
+            <CardDescription className="text-center text-gray-600 dark:text-gray-300">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md">
+                  {error}
+                </div>
+              )}
+              
+              <div className="p-3 text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-md">
+                <strong>Demo Credentials:</strong><br />
+                Email: student@studymate.ai<br />
+                Password: demo123
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
                 <div className="relative">
@@ -59,7 +86,7 @@ const Login = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                    className="pl-10 bg-white dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] dark:text-white"
                     required
                   />
                 </div>
@@ -75,13 +102,13 @@ const Login = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                    className="pl-10 pr-10 bg-white dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] dark:text-white"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -99,17 +126,17 @@ const Login = () => {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200 dark:border-gray-600" />
+                <span className="w-full border-t border-gray-200 dark:border-[#1A1A1A]" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-800 px-2 text-gray-500">Or continue with</span>
+                <span className="bg-white dark:bg-[#1F1F1F] px-2 text-gray-500 dark:text-gray-400">Or continue with</span>
               </div>
             </div>
 
             <Button
               onClick={handleGoogleLogin}
               variant="outline"
-              className="w-full border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="w-full border-gray-200 dark:border-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#2C2C2C] dark:text-gray-300"
             >
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

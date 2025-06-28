@@ -76,7 +76,7 @@ const Quiz = () => {
 
   if (showResults) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
         <Sidebar />
         
         <main className="flex-1 p-8">
@@ -85,8 +85,8 @@ const Quiz = () => {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-4">
                 <Trophy className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
-              <p className="text-xl text-gray-600">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Quiz Complete!</h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300">
                 You scored {score} out of {sampleQuiz.length} ({percentage}%)
               </p>
             </div>
@@ -97,17 +97,17 @@ const Quiz = () => {
                 const isCorrect = userAnswer === question.correct;
                 
                 return (
-                  <Card key={question.id} className="border-0 shadow-lg">
+                  <Card key={question.id} className="border-0 shadow-lg dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
                     <CardHeader>
-                      <CardTitle className="flex items-center text-lg">
+                      <CardTitle className="flex items-center text-lg dark:text-white">
                         {isCorrect ? (
-                          <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
+                          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400 mr-3" />
                         ) : (
-                          <XCircle className="h-6 w-6 text-red-600 mr-3" />
+                          <XCircle className="h-6 w-6 text-red-600 dark:text-red-400 mr-3" />
                         )}
                         Question {index + 1}
                       </CardTitle>
-                      <CardDescription>{question.question}</CardDescription>
+                      <CardDescription className="dark:text-gray-300">{question.question}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2 mb-4">
@@ -116,24 +116,24 @@ const Quiz = () => {
                             key={optionIndex}
                             className={`p-3 rounded-lg border ${
                               optionIndex === question.correct
-                                ? 'bg-green-100 border-green-300 text-green-800'
+                                ? 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-600 text-green-800 dark:text-green-300'
                                 : optionIndex === userAnswer && !isCorrect
-                                ? 'bg-red-100 border-red-300 text-red-800'
-                                : 'bg-gray-50 border-gray-200'
+                                ? 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-300'
+                                : 'bg-gray-50 dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] text-gray-900 dark:text-white'
                             }`}
                           >
                             {option}
                             {optionIndex === question.correct && (
-                              <span className="ml-2 text-green-600 font-medium">✓ Correct</span>
+                              <span className="ml-2 text-green-600 dark:text-green-300 font-medium">✓ Correct</span>
                             )}
                             {optionIndex === userAnswer && !isCorrect && (
-                              <span className="ml-2 text-red-600 font-medium">✗ Your answer</span>
+                              <span className="ml-2 text-red-600 dark:text-red-300 font-medium">✗ Your answer</span>
                             )}
                           </div>
                         ))}
                       </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-blue-800">
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <p className="text-sm text-blue-800 dark:text-blue-300">
                           <strong>Explanation:</strong> {question.explanation}
                         </p>
                       </div>
@@ -158,38 +158,38 @@ const Quiz = () => {
   const currentQ = sampleQuiz[currentQuestion];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
       <Sidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Quiz</h1>
-            <p className="text-gray-600">Test your knowledge with AI-generated questions</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Quiz</h1>
+            <p className="text-gray-600 dark:text-gray-300">Test your knowledge with AI-generated questions</p>
           </div>
 
           {/* Progress */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Question {currentQuestion + 1} of {sampleQuiz.length}
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {Math.round(((currentQuestion + 1) / sampleQuiz.length) * 100)}% Complete
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-[#1A1A1A] rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                className="h-2 rounded-full transition-all duration-300 bg-gradient-to-r from-purple-600 to-blue-600 dark:bg-purple-500"
                 style={{ width: `${((currentQuestion + 1) / sampleQuiz.length) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Question */}
-          <Card className="border-0 shadow-lg mb-8">
+          <Card className="border-0 shadow-lg mb-8 dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
             <CardHeader>
-              <CardTitle className="text-xl">{currentQ.question}</CardTitle>
+              <CardTitle className="text-xl dark:text-white">{currentQ.question}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -199,15 +199,15 @@ const Quiz = () => {
                     onClick={() => handleAnswerSelect(index)}
                     className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
                       selectedOption === index
-                        ? 'border-purple-500 bg-purple-50 text-purple-900'
-                        : 'border-gray-200 bg-white hover:border-purple-200 hover:bg-purple-25'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-900 dark:text-purple-300'
+                        : 'border-gray-200 dark:border-[#1A1A1A] bg-white dark:bg-[#2C2C2C] hover:border-purple-200 dark:hover:border-purple-600 hover:bg-purple-25 dark:hover:bg-purple-900/20 text-gray-900 dark:text-white'
                     }`}
                   >
                     <div className="flex items-center">
                       <div className={`w-6 h-6 rounded-full border-2 mr-3 flex-shrink-0 ${
                         selectedOption === index
                           ? 'border-purple-500 bg-purple-500'
-                          : 'border-gray-300'
+                          : 'border-gray-300 dark:border-gray-600'
                       }`}>
                         {selectedOption === index && (
                           <div className="w-full h-full rounded-full bg-white scale-50"></div>
@@ -227,6 +227,7 @@ const Quiz = () => {
               variant="outline"
               onClick={handlePrevQuestion}
               disabled={currentQuestion === 0}
+              className="dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]"
             >
               Previous
             </Button>

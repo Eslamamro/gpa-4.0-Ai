@@ -66,14 +66,14 @@ const Flashcards = () => {
   const learnedCount = flashcards.filter(card => card.learned).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
       <Sidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Flashcards</h1>
-            <p className="text-gray-600 dark:text-gray-400">Study with AI-generated flashcards</p>
+            <p className="text-gray-600 dark:text-gray-300">Study with AI-generated flashcards</p>
           </div>
 
           {/* Progress Bar */}
@@ -82,12 +82,12 @@ const Flashcards = () => {
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Progress: {learnedCount} / {flashcards.length} learned
               </span>
-              <Button variant="outline" size="sm" onClick={resetProgress} className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+              <Button variant="outline" size="sm" onClick={resetProgress} className="dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset Progress
               </Button>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-[#1A1A1A] rounded-full h-2">
               <div 
                 className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(learnedCount / flashcards.length) * 100}%` }}
@@ -105,7 +105,7 @@ const Flashcards = () => {
                 onClick={flipCard}
               >
                 {/* Front of card */}
-                <Card className={`absolute inset-0 w-full h-full backface-hidden border-0 shadow-xl dark:bg-gray-800 ${
+                <Card className={`absolute inset-0 w-full h-full backface-hidden border-0 shadow-xl dark:bg-[#1F1F1F] dark:border-[#1A1A1A] ${
                   currentCard.learned ? 'ring-2 ring-green-400' : ''
                 }`}>
                   <CardContent className="flex items-center justify-center h-full p-8">
@@ -122,7 +122,7 @@ const Flashcards = () => {
                 </Card>
 
                 {/* Back of card */}
-                <Card className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 dark:bg-gray-800 ${
+                <Card className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 dark:bg-[#1F1F1F] dark:border-[#1A1A1A] ${
                   currentCard.learned ? 'ring-2 ring-green-400' : ''
                 }`}>
                   <CardContent className="flex items-center justify-center h-full p-8">
@@ -143,7 +143,7 @@ const Flashcards = () => {
 
           {/* Controls */}
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <Button variant="outline" onClick={prevCard} className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={prevCard} className="dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
@@ -152,7 +152,7 @@ const Flashcards = () => {
               {currentIndex + 1} of {flashcards.length}
             </span>
             
-            <Button variant="outline" onClick={nextCard} className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={nextCard} className="dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
               Next
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>

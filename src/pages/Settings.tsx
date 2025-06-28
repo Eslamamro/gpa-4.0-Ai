@@ -13,22 +13,22 @@ const Settings = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
       <Sidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Settings</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your account and preferences</p>
+            <p className="text-gray-600 dark:text-gray-300">Manage your account and preferences</p>
           </div>
 
           <div className="grid gap-6">
             {/* Profile Settings */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
+            <Card className="dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
               <CardHeader>
                 <CardTitle className="dark:text-white">Profile Information</CardTitle>
-                <CardDescription className="dark:text-gray-400">
+                <CardDescription className="dark:text-gray-300">
                   Update your personal information
                 </CardDescription>
               </CardHeader>
@@ -39,7 +39,7 @@ const Settings = () => {
                     <Input 
                       id="name" 
                       defaultValue="John Doe" 
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="dark:bg-[#2C2C2C] dark:border-[#1A1A1A] dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -48,7 +48,7 @@ const Settings = () => {
                       id="email" 
                       type="email" 
                       defaultValue="john@example.com" 
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="dark:bg-[#2C2C2C] dark:border-[#1A1A1A] dark:text-white"
                     />
                   </div>
                 </div>
@@ -59,13 +59,13 @@ const Settings = () => {
             </Card>
 
             {/* Appearance Settings */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
+            <Card className="dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
               <CardHeader>
                 <CardTitle className="dark:text-white flex items-center">
                   <Moon className="h-5 w-5 mr-2" />
                   Appearance
                 </CardTitle>
-                <CardDescription className="dark:text-gray-400">
+                <CardDescription className="dark:text-gray-300">
                   Customize how StudyMate AI looks
                 </CardDescription>
               </CardHeader>
@@ -86,13 +86,13 @@ const Settings = () => {
             </Card>
 
             {/* Notification Settings */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
+            <Card className="dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
               <CardHeader>
                 <CardTitle className="dark:text-white flex items-center">
                   <Bell className="h-5 w-5 mr-2" />
                   Notifications
                 </CardTitle>
-                <CardDescription className="dark:text-gray-400">
+                <CardDescription className="dark:text-gray-300">
                   Manage your notification preferences
                 </CardDescription>
               </CardHeader>
@@ -119,13 +119,13 @@ const Settings = () => {
             </Card>
 
             {/* Premium Upgrade */}
-            <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+            <Card className="border-purple-200 dark:border-purple-600/50 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 dark:bg-[#1F1F1F]">
               <CardHeader>
                 <CardTitle className="flex items-center text-purple-700 dark:text-purple-300">
                   <Crown className="h-5 w-5 mr-2" />
                   Upgrade to Premium
                 </CardTitle>
-                <CardDescription className="dark:text-gray-400">
+                <CardDescription className="dark:text-gray-300">
                   Unlock unlimited features and advanced AI capabilities
                 </CardDescription>
               </CardHeader>
@@ -153,18 +153,18 @@ const Settings = () => {
             </Card>
 
             {/* Data & Privacy */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
+            <Card className="dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
               <CardHeader>
                 <CardTitle className="dark:text-white flex items-center">
                   <Shield className="h-5 w-5 mr-2" />
                   Data & Privacy
                 </CardTitle>
-                <CardDescription className="dark:text-gray-400">
+                <CardDescription className="dark:text-gray-300">
                   Manage your data and privacy settings
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                <Button variant="outline" className="w-full dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
                   <Download className="h-4 w-4 mr-2" />
                   Export My Data
                 </Button>
