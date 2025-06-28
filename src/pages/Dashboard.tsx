@@ -1,47 +1,141 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, FileText, RefreshCw, Download, BookOpen, Brain, Target } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
+import { apiClient, type User, type Document } from '@/services/api';
 
 const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [noteText, setNoteText] = useState('');
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  // Check authentication and load user data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        // Check if user is stored in localStorage
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+          navigate('/login');
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+
+        // Load user's documents
+        const userDocuments = await apiClient.getDocuments();
+        setDocuments(userDocuments);
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+        // If token is invalid, redirect to login
+        localStorage.removeItem('user');
+        navigate('/login');
+      }
+    };
+
+    loadUserData();
+  }, [navigate]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      // Here you would typically read the file content
       console.log('File selected:', file.name);
     }
   };
 
   const handleGenerateContent = async () => {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError('');
+    
+    try {
+      let document: Document;
+      
+      if (selectedFile) {
+        // Upload file
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('title', selectedFile.name);
+        document = await apiClient.uploadDocument(formData);
+      } else if (noteText.trim()) {
+        // Create text document
+        const blob = new Blob([noteText], { type: 'text/plain' });
+        const textFile = new File([blob], 'pasted-notes.txt', { type: 'text/plain' });
+        const formData = new FormData();
+        formData.append('file', textFile);
+        formData.append('title', 'Pasted Notes');
+        
+        document = await apiClient.uploadDocument(formData);
+      } else {
+        setError('Please select a file or enter some text');
+        return;
+      }
+
+      // Generate content from the document
+      const summary = `AI summary for "${document.title}" will be generated shortly. The document has been successfully uploaded and is being processed.`;
+      
+      // Generate flashcards from the document
+      const flashcards = await apiClient.getFlashcardSets();
+      const documentFlashcards = flashcards.filter(set => 
+        set.description?.includes(document.title)
+      );
+
+      // For now, show some sample generated content
+      // TODO: Implement actual AI generation endpoints
       setGeneratedContent({
-        summary: "This is a sample AI-generated summary of your notes. The key concepts include data structures, algorithms, and time complexity analysis.",
-        flashcards: [
-          { question: "What is Big O notation?", answer: "A mathematical notation used to describe the computational complexity of algorithms." },
-          { question: "What is a binary tree?", answer: "A tree data structure where each node has at most two children." }
+        summary,
+        document,
+        flashcards: documentFlashcards.length > 0 ? [] : [
+          { 
+            id: 1,
+            question: "Key concept from uploaded content", 
+            answer: "AI-generated answer based on your notes" 
+          }
         ],
         quiz: [
           {
-            question: "Which sorting algorithm has the best average-case time complexity?",
-            options: ["Bubble Sort", "Quick Sort", "Insertion Sort", "Selection Sort"],
-            correct: 1
+            question: "What is the main topic discussed in your notes?",
+            options: ["Topic A", "Topic B", "Topic C", "Topic D"],
+            correct: 0
           }
         ]
       });
+
+      // Refresh documents list
+      const updatedDocuments = await apiClient.getDocuments();
+      setDocuments(updatedDocuments);
+      
+      // Clear form
+      setSelectedFile(null);
+      setNoteText('');
+      
+    } catch (error: any) {
+      console.error('Failed to generate content:', error);
+      setError(error.message || 'Failed to generate content. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#000000] flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
@@ -50,9 +144,50 @@ const Dashboard = () => {
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Welcome back, {user.first_name || user.username}!
+            </h1>
             <p className="text-gray-600 dark:text-gray-300">Upload your notes and let AI transform your study experience</p>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="p-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md">
+              {error}
+            </div>
+          )}
+
+          {/* Recent Documents */}
+          {documents.length > 0 && (
+            <Card className="border-0 shadow-lg dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
+              <CardHeader>
+                <CardTitle className="flex items-center dark:text-white">
+                  <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                  Recent Documents
+                </CardTitle>
+                <CardDescription className="dark:text-gray-300">
+                  Your uploaded study materials
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {documents.slice(0, 3).map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#2C2C2C] rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{doc.title}</h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Uploaded {new Date(doc.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" className="dark:border-[#1A1A1A] dark:text-gray-300">
+                        View
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Upload Section */}
           <Card className="border-0 shadow-lg dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
@@ -156,7 +291,12 @@ const Dashboard = () => {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" size="sm" className="mt-4 dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4 dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]"
+                    onClick={() => navigate('/flashcards')}
+                  >
                     View All Flashcards
                   </Button>
                 </CardContent>
@@ -179,7 +319,12 @@ const Dashboard = () => {
                       {generatedContent.quiz[0].question}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" className="mt-4 dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4 dark:border-[#1A1A1A] dark:text-gray-300 dark:hover:bg-[#2C2C2C]"
+                    onClick={() => navigate('/quiz')}
+                  >
                     Take Quiz
                   </Button>
                 </CardContent>

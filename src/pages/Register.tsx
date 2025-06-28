@@ -1,15 +1,18 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { apiClient } from '@/services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -17,17 +20,42 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
+    
     setIsLoading(true);
-    // TODO: Implement actual registration logic with Supabase
-    console.log('Registration attempt:', formData);
-    setTimeout(() => setIsLoading(false), 1000);
+    
+    try {
+      const response = await apiClient.register({
+        email: formData.email,
+        username: formData.username,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        password: formData.password,
+        password_confirm: formData.confirmPassword
+      });
+      
+      console.log('Registration successful!', response.user);
+      
+      // Store user info in localStorage
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      setError(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -65,16 +93,51 @@ const Register = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md">
+                  {error}
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-gray-700 dark:text-gray-300">First Name</Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    placeholder="First name"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="bg-white dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] dark:text-white"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-gray-700 dark:text-gray-300">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    placeholder="Last name"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="bg-white dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Full Name</Label>
+                <Label htmlFor="username" className="text-gray-700 dark:text-gray-300">Username</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    id="name"
-                    name="name"
+                    id="username"
+                    name="username"
                     type="text"
-                    placeholder="Enter your full name"
-                    value={formData.name}
+                    placeholder="Choose a username"
+                    value={formData.username}
                     onChange={handleChange}
                     className="pl-10 bg-white dark:bg-[#2C2C2C] border-gray-200 dark:border-[#1A1A1A] dark:text-white"
                     required

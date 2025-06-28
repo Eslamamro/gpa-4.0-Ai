@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { apiClient } from '@/services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,20 +21,24 @@ const Login = () => {
     setIsLoading(true);
     setError('');
     
-    // Demo credentials for bypassing login
-    const demoEmail = 'student@studymate.ai';
-    const demoPassword = 'demo123';
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      if (email === demoEmail && password === demoPassword) {
-        console.log('Login successful!');
-        navigate('/dashboard');
-      } else {
-        setError('Invalid credentials. Use: student@studymate.ai / demo123');
-      }
+    try {
+      const response = await apiClient.login({
+        email,
+        password
+      });
+      
+      console.log('Login successful!', response.user);
+      
+      // Store user info in localStorage for now
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      setError(error.message || 'Login failed. Please check your credentials.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -69,12 +74,6 @@ const Login = () => {
                   {error}
                 </div>
               )}
-              
-              <div className="p-3 text-sm text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-md">
-                <strong>Demo Credentials:</strong><br />
-                Email: student@studymate.ai<br />
-                Password: demo123
-              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
