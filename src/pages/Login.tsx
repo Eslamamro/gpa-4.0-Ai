@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { apiClient } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -16,23 +17,35 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:bg-[#000000] flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     
     try {
-      const response = await apiClient.login({
-        email,
-        password
-      });
+      await login(email, password);
       
-      console.log('Login successful!', response.user);
-      
-      // Store user info in localStorage for now
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      navigate('/dashboard');
+      // Navigation will be handled by the useEffect that watches isAuthenticated
+      console.log('Login successful!');
     } catch (error: any) {
       console.error('Login failed:', error);
       setError(error.message || 'Login failed. Please check your credentials.');

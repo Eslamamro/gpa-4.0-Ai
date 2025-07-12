@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { apiClient } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Register = () => {
+  const { isAuthenticated, isLoading: authLoading, register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,6 +24,25 @@ const Register = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:bg-[#000000] flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -35,7 +55,7 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      const response = await apiClient.register({
+      await register({
         email: formData.email,
         username: formData.username,
         first_name: formData.firstName,
@@ -44,12 +64,8 @@ const Register = () => {
         password_confirm: formData.confirmPassword
       });
       
-      console.log('Registration successful!', response.user);
-      
-      // Store user info in localStorage
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      navigate('/dashboard');
+      // Navigation will be handled by the useEffect that watches isAuthenticated
+      console.log('Registration successful!');
     } catch (error: any) {
       console.error('Registration failed:', error);
       setError(error.message || 'Registration failed. Please try again.');

@@ -7,11 +7,9 @@ export interface User {
   username: string;
   first_name: string;
   last_name: string;
-  profile_picture?: string;
+  student_id?: string;
+  phone_number?: string;
   date_of_birth?: string;
-  study_goal?: string;
-  preferred_study_time?: string;
-  is_premium: boolean;
   created_at: string;
 }
 
@@ -24,40 +22,64 @@ export interface AuthResponse {
 export interface Document {
   id: number;
   title: string;
+  description?: string;
   file: string;
-  document_type: string;
-  file_size_mb?: number;
-  is_processed: boolean;
+  document_type: 'PDF' | 'IMAGE' | 'TEXT';
+  file_size: number;
+  file_size_mb: number;
+  status: 'UPLOADING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  is_public: boolean;
+  tags?: string;
+  extracted_text?: string;
+  page_count?: number;
+  file_extension?: string;
+  is_image: boolean;
+  is_pdf: boolean;
+  user_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentTag {
+  id: number;
+  name: string;
+  color: string;
   created_at: string;
 }
 
-export interface FlashcardSet {
+export interface DocumentShare {
   id: number;
-  title: string;
-  description: string;
-  difficulty_level: string;
-  color_theme: string;
-  card_count: number;
+  document: number;
+  document_title?: string;
+  shared_by_name?: string;
+  shared_with: number;
+  shared_with_name?: string;
+  shared_with_email?: string;
+  can_edit: boolean;
+  message?: string;
   created_at: string;
 }
 
-export interface Flashcard {
-  id: number;
-  question: string;
-  answer: string;
-  difficulty_level: string;
-  learned?: boolean;
-  created_at: string;
+export interface DocumentStats {
+  total_documents: number;
+  pdf_documents: number;
+  image_documents: number;
+  text_documents: number;
+  total_size_mb: number;
+  public_documents: number;
+  private_documents: number;
+  documents_by_type: { [key: string]: number };
+  recent_uploads: Document[];
 }
 
-export interface Quiz {
-  id: number;
-  title: string;
-  description: string;
-  difficulty_level: string;
-  time_limit_minutes?: number;
-  question_count: number;
-  created_at: string;
+export interface DashboardStats {
+  total_documents: number;
+  pdf_documents: number;
+  image_documents: number;
+  text_documents: number;
+  total_size_mb: number;
+  public_documents: number;
+  private_documents: number;
 }
 
 // API Client class
@@ -74,6 +96,16 @@ class APIClient {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
+
+    if (this.token) {
+      headers['Authorization'] = `Token ${this.token}`;
+    }
+
+    return headers;
+  }
+
+  private getFileHeaders(): HeadersInit {
+    const headers: HeadersInit = {};
 
     if (this.token) {
       headers['Authorization'] = `Token ${this.token}`;
@@ -132,8 +164,11 @@ class APIClient {
     last_name: string;
     password: string;
     password_confirm: string;
+    student_id?: string;
+    phone_number?: string;
+    date_of_birth?: string;
   }): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('/users/register/', {
+    const response = await this.request<AuthResponse>('/auth/register/', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
@@ -148,7 +183,7 @@ class APIClient {
     email: string;
     password: string;
   }): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('/users/login/', {
+    const response = await this.request<AuthResponse>('/auth/login/', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -160,7 +195,7 @@ class APIClient {
   }
 
   async logout(): Promise<void> {
-    await this.request('/users/logout/', {
+    await this.request('/auth/logout/', {
       method: 'POST',
     });
     
@@ -169,47 +204,82 @@ class APIClient {
   }
 
   async getProfile(): Promise<User> {
-    return this.request<User>('/users/profile/');
+    return this.request<User>('/auth/profile/');
   }
 
   async updateProfile(userData: Partial<User>): Promise<{ user: User; message: string }> {
-    return this.request(`/users/profile/`, {
+    return this.request(`/auth/profile/update/`, {
       method: 'PUT',
       body: JSON.stringify(userData),
     });
   }
 
-  async getUserStats(): Promise<{
-    total_documents: number;
-    total_flashcard_sets: number;
-    total_quizzes: number;
-    total_study_sessions: number;
-    total_quiz_attempts: number;
-    avg_quiz_score: number;
-    total_study_time_minutes: number;
-  }> {
-    return this.request('/users/stats/');
+  async changePassword(passwordData: {
+    old_password: string;
+    new_password: string;
+    new_password_confirm: string;
+  }): Promise<{ message: string; token: string }> {
+    const response = await this.request<{ message: string; token: string }>('/auth/change-password/', {
+      method: 'POST',
+      body: JSON.stringify(passwordData),
+    });
+    
+    this.token = response.token;
+    localStorage.setItem('auth_token', response.token);
+    
+    return response;
   }
 
-  // Documents endpoints
-  async getDocuments(): Promise<Document[]> {
-    return this.request<Document[]>('/documents/');
+  async getDashboard(): Promise<{ user: User; stats: DashboardStats }> {
+    return this.request('/auth/dashboard/');
+  }
+
+  // Document endpoints
+  async getDocuments(params?: {
+    type?: string;
+    status?: string;
+    public?: boolean;
+    search?: string;
+  }): Promise<Document[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.public !== undefined) queryParams.append('public', params.public.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    
+    const queryString = queryParams.toString();
+    return this.request<Document[]>(`/documents/${queryString ? `?${queryString}` : ''}`);
   }
 
   async uploadDocument(formData: FormData): Promise<Document> {
     const response = await fetch(`${this.baseURL}/documents/`, {
       method: 'POST',
-      headers: {
-        'Authorization': this.token ? `Token ${this.token}` : '',
-      },
+      headers: this.getFileHeaders(),
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload document');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to upload document');
     }
 
     return response.json();
+  }
+
+  async getDocument(id: number): Promise<Document> {
+    return this.request<Document>(`/documents/${id}/`);
+  }
+
+  async updateDocument(id: number, documentData: {
+    title?: string;
+    description?: string;
+    is_public?: boolean;
+    tags?: string;
+  }): Promise<Document> {
+    return this.request(`/documents/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(documentData),
+    });
   }
 
   async deleteDocument(id: number): Promise<void> {
@@ -218,78 +288,82 @@ class APIClient {
     });
   }
 
-  async generateSummary(documentId: number, summaryType: string = 'brief'): Promise<any> {
-    return this.request(`/documents/${documentId}/generate-summary/`, {
+  async downloadDocument(id: number): Promise<{
+    download_url: string;
+    filename: string;
+    file_size_mb: number;
+  }> {
+    return this.request(`/documents/${id}/download/`);
+  }
+
+  // Document statistics
+  async getDocumentStats(): Promise<DocumentStats> {
+    return this.request<DocumentStats>('/documents/stats/');
+  }
+
+  // Document tags
+  async getDocumentTags(): Promise<DocumentTag[]> {
+    return this.request<DocumentTag[]>('/tags/');
+  }
+
+  async createDocumentTag(tagData: {
+    name: string;
+    color?: string;
+  }): Promise<DocumentTag> {
+    return this.request('/tags/', {
       method: 'POST',
-      body: JSON.stringify({ summary_type: summaryType }),
+      body: JSON.stringify(tagData),
     });
   }
 
-  // Flashcards endpoints
-  async getFlashcardSets(): Promise<FlashcardSet[]> {
-    return this.request<FlashcardSet[]>('/flashcards/sets/');
-  }
-
-  async createFlashcardSet(setData: {
-    title: string;
-    description: string;
-    difficulty_level: string;
-    color_theme?: string;
-  }): Promise<FlashcardSet> {
-    return this.request('/flashcards/sets/', {
-      method: 'POST',
-      body: JSON.stringify(setData),
+  async updateDocumentTag(id: number, tagData: {
+    name?: string;
+    color?: string;
+  }): Promise<DocumentTag> {
+    return this.request(`/tags/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(tagData),
     });
   }
 
-  async deleteFlashcardSet(id: number): Promise<void> {
-    await this.request(`/flashcards/sets/${id}/`, {
+  async deleteDocumentTag(id: number): Promise<void> {
+    await this.request(`/tags/${id}/`, {
       method: 'DELETE',
     });
   }
 
-  async getFlashcards(setId?: number): Promise<Flashcard[]> {
-    const endpoint = setId ? `/flashcards/sets/${setId}/cards/` : '/flashcards/cards/';
-    return this.request<Flashcard[]>(endpoint);
-  }
-
-  async createFlashcard(setId: number, cardData: {
-    question: string;
-    answer: string;
-    difficulty_level?: string;
-  }): Promise<Flashcard> {
-    return this.request(`/flashcards/sets/${setId}/cards/`, {
+  // Document sharing
+  async shareDocument(documentId: number, shareData: {
+    shared_with_email: string;
+    can_edit?: boolean;
+    message?: string;
+  }): Promise<DocumentShare> {
+    return this.request(`/documents/${documentId}/share/`, {
       method: 'POST',
-      body: JSON.stringify(cardData),
+      body: JSON.stringify(shareData),
     });
   }
 
-  // Quizzes endpoints
-  async getQuizzes(): Promise<Quiz[]> {
-    return this.request<Quiz[]>('/quizzes/');
+  async getDocumentShares(type: 'sent' | 'received' = 'received'): Promise<DocumentShare[]> {
+    return this.request<DocumentShare[]>(`/shares/?type=${type}`);
   }
 
-  async createQuiz(quizData: {
-    title: string;
-    description: string;
-    difficulty_level: string;
-    time_limit_minutes?: number;
-  }): Promise<Quiz> {
-    return this.request('/quizzes/', {
-      method: 'POST',
-      body: JSON.stringify(quizData),
-    });
-  }
-
-  async deleteQuiz(id: number): Promise<void> {
-    await this.request(`/quizzes/${id}/`, {
-      method: 'DELETE',
-    });
+  // Public documents
+  async getPublicDocuments(params?: {
+    type?: string;
+    search?: string;
+  }): Promise<Document[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.search) queryParams.append('search', params.search);
+    
+    const queryString = queryParams.toString();
+    return this.request<Document[]>(`/public-documents/${queryString ? `?${queryString}` : ''}`);
   }
 
   // Utility methods
   isAuthenticated(): boolean {
-    return !!this.token;
+    return this.token !== null;
   }
 
   setToken(token: string): void {

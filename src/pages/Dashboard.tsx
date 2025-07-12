@@ -3,47 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, RefreshCw, Download, BookOpen, Brain, Target } from 'lucide-react';
+import { Upload, FileText, RefreshCw, Download, BookOpen, Brain, Target, MessageSquare } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiClient, type User, type Document } from '@/services/api';
+import ChatBox from '@/components/ChatBox';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [noteText, setNoteText] = useState('');
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  // Check authentication and load user data
+  // Load user's documents when component mounts
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadDocuments = async () => {
       try {
-        // Check if user is stored in localStorage
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
-          navigate('/login');
-          return;
-        }
-
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-
-        // Load user's documents
         const userDocuments = await apiClient.getDocuments();
         setDocuments(userDocuments);
       } catch (error) {
-        console.error('Failed to load user data:', error);
-        // If token is invalid, redirect to login
-        localStorage.removeItem('user');
-        navigate('/login');
+        console.error('Failed to load documents:', error);
       }
     };
 
-    loadUserData();
-  }, [navigate]);
+    if (user) {
+      loadDocuments();
+    }
+  }, [user]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -83,18 +73,12 @@ const Dashboard = () => {
       // Generate content from the document
       const summary = `AI summary for "${document.title}" will be generated shortly. The document has been successfully uploaded and is being processed.`;
       
-      // Generate flashcards from the document
-      const flashcards = await apiClient.getFlashcardSets();
-      const documentFlashcards = flashcards.filter(set => 
-        set.description?.includes(document.title)
-      );
-
       // For now, show some sample generated content
       // TODO: Implement actual AI generation endpoints
       setGeneratedContent({
         summary,
         document,
-        flashcards: documentFlashcards.length > 0 ? [] : [
+        flashcards: [
           { 
             id: 1,
             question: "Key concept from uploaded content", 
@@ -126,17 +110,6 @@ const Dashboard = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#000000] flex items-center justify-center">
-        <div className="text-center">
-          <Brain className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-[#000000]">
       <Sidebar />
@@ -147,7 +120,7 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Welcome back, {user.first_name || user.username}!
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">Upload your notes and let AI transform your study experience</p>
+            <p className="text-gray-600 dark:text-gray-300">Upload your notes and chat with AI for a complete study experience</p>
           </div>
 
           {/* Error Display */}
@@ -331,6 +304,24 @@ const Dashboard = () => {
               </Card>
             </div>
           )}
+
+          {/* AI Chat Section */}
+          <Card className="border-0 shadow-lg dark:bg-[#1F1F1F] dark:border-[#1A1A1A]">
+            <CardHeader>
+              <CardTitle className="flex items-center dark:text-white">
+                <MessageSquare className="h-5 w-5 mr-2 text-purple-600" />
+                AI Study Assistant
+              </CardTitle>
+              <CardDescription className="dark:text-gray-300">
+                Chat with StudyMate AI powered by DeepSeek R1 for personalized study help
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChatBox />
+            </CardContent>
+          </Card>
+
+
         </div>
       </main>
     </div>
